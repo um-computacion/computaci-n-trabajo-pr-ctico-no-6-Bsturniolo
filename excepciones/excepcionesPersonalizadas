@@ -1,0 +1,35 @@
+from datetime import datetime
+from src import turno
+class PacienteNoExisteError(Exception):
+    def __init__(self, dni):
+        super().__init__(f"No se encontró el paciente con DNI {dni}.")
+
+class MedicoNoExisteError(Exception):
+    def __init__(self, matricula):
+        super().__init__(f"No se encontró el médico con matrícula {matricula}.")
+
+class TurnoDuplicadoError(Exception):
+    def __init__(self, matricula, fecha_hora):
+        super().__init__(f"Ya existe un turno con el médico {matricula} en {fecha_hora}.")
+
+def agendar_turno(self, dni: str, matricula: str, fecha_hora: datetime):
+    paciente = self._pacientes.get(dni)
+    medico = self._medicos.get(matricula)
+
+    if not paciente:
+        raise PacienteNoExisteError(dni)
+
+    if not medico:
+        raise MedicoNoExisteError(matricula)
+
+    for turno in self._turnos:
+        if (turno._medico.obtener_matricula() == matricula and
+                turno.obtener_fecha_hora() == fecha_hora):
+            raise TurnoDuplicadoError(matricula, fecha_hora)
+
+    if fecha_hora < datetime.now():
+        raise ValueError("No se puede agendar un turno en el pasado.")
+
+    turno = turno(paciente, medico, fecha_hora)
+    self._turnos.append(turno)
+    self._historias_clinicas[dni].agregar_turno(turno)
